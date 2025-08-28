@@ -1,13 +1,18 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import LendingDashboard from "@/components/LendingDashboard";
+import ScholarshipHub from "@/components/ScholarshipHub";
+import CommunitySection from "@/components/CommunitySection";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <main className="min-h-screen">
+      <Navbar />
+      <Hero />
+      <LendingDashboard />
+      <ScholarshipHub />
+      <CommunitySection />
+    </main>
   );
 };
 

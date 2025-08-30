@@ -5,13 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { DocumentUpload } from '@/components/DocumentUpload';
 import { Loader2, GraduationCap, DollarSign, Calendar, FileText, Send } from 'lucide-react';
+import DocumentUpload from '@/components/DocumentUpload';
 
 export default function ApplyScholarship() {
   const { user, profile, loading } = useAuth();
@@ -26,7 +25,7 @@ export default function ApplyScholarship() {
   const [graduationYear, setGraduationYear] = useState('');
   const [fieldOfStudy, setFieldOfStudy] = useState('');
   const [additionalDocuments, setAdditionalDocuments] = useState('');
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState<string[]>([]);
 
   useEffect(() => {
     fetchScholarships();
@@ -91,7 +90,7 @@ export default function ApplyScholarship() {
     
     setIsLoading(true);
 
-    const { data: applicationData, error } = await supabase
+    const { error } = await supabase
       .from('scholarship_applications')
       .insert({
         scholarship_id: selectedScholarship.id,
@@ -101,10 +100,8 @@ export default function ApplyScholarship() {
         graduation_year: parseInt(graduationYear),
         field_of_study: fieldOfStudy,
         additional_documents: additionalDocuments.split('\n').filter(doc => doc.trim()),
-        uploaded_documents: uploadedFiles,
-      })
-      .select()
-      .single();
+        uploaded_documents: uploadedDocuments,
+      });
 
     if (error) {
       toast({
@@ -124,7 +121,7 @@ export default function ApplyScholarship() {
       setGraduationYear('');
       setFieldOfStudy('');
       setAdditionalDocuments('');
-      setUploadedFiles([]);
+      setUploadedDocuments([]);
       setSelectedScholarship(null);
       
       navigate('/dashboard');
@@ -296,21 +293,24 @@ export default function ApplyScholarship() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="additionalDocuments">Additional Notes</Label>
+                        <Label htmlFor="additionalDocuments">Additional Information</Label>
                         <Textarea
                           id="additionalDocuments"
                           value={additionalDocuments}
                           onChange={(e) => setAdditionalDocuments(e.target.value)}
-                          placeholder="Any additional notes or achievements..."
+                          placeholder="List any additional achievements or information (one per line)..."
                           rows={3}
                         />
                       </div>
 
+                      {/* Document Upload Section */}
                       <DocumentUpload
                         applicationId={selectedScholarship.id}
                         userId={user.id}
-                        onFilesUploaded={setUploadedFiles}
-                        existingFiles={uploadedFiles}
+                        onUploadComplete={(fileUrls) => {
+                          setUploadedDocuments(prev => [...prev, ...fileUrls]);
+                        }}
+                        existingDocuments={uploadedDocuments}
                       />
 
                       <Button type="submit" className="w-full" disabled={isLoading}>

@@ -19,9 +19,9 @@ import {
   DollarSign,
   GraduationCap,
   FileText,
-  Download,
-  ExternalLink
+  Download
 } from 'lucide-react';
+import DocumentUpload from '@/components/DocumentUpload';
 
 export default function InstitutionDashboard() {
   const { user, profile, loading } = useAuth();
@@ -359,29 +359,15 @@ export default function InstitutionDashboard() {
                               </p>
                             </div>
 
+                            {/* Documents Section */}
                             {application.uploaded_documents && application.uploaded_documents.length > 0 && (
                               <div className="mb-4">
                                 <p className="text-sm font-medium mb-2">Uploaded Documents:</p>
-                                <div className="space-y-2">
-                                  {application.uploaded_documents.map((filePath: string, idx: number) => (
-                                    <div key={idx} className="flex items-center justify-between p-2 border rounded bg-secondary/10">
-                                      <div className="flex items-center gap-2">
-                                        <FileText className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-sm truncate max-w-[200px]">
-                                          {getFileName(filePath)}
-                                        </span>
-                                      </div>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => downloadDocument(filePath)}
-                                        className="h-8 px-2"
-                                      >
-                                        <Download className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  ))}
-                                </div>
+                                <DocumentUpload
+                                  userId={user.id}
+                                  existingDocuments={application.uploaded_documents}
+                                  isReadOnly={true}
+                                />
                               </div>
                             )}
 

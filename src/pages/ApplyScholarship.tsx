@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { DocumentUpload } from '@/components/DocumentUpload';
 import { Loader2, GraduationCap, DollarSign, Calendar, FileText, Send } from 'lucide-react';
 
 export default function ApplyScholarship() {
@@ -25,6 +26,7 @@ export default function ApplyScholarship() {
   const [graduationYear, setGraduationYear] = useState('');
   const [fieldOfStudy, setFieldOfStudy] = useState('');
   const [additionalDocuments, setAdditionalDocuments] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   useEffect(() => {
     fetchScholarships();
@@ -89,7 +91,7 @@ export default function ApplyScholarship() {
     
     setIsLoading(true);
 
-    const { error } = await supabase
+    const { data: applicationData, error } = await supabase
       .from('scholarship_applications')
       .insert({
         scholarship_id: selectedScholarship.id,
@@ -99,7 +101,10 @@ export default function ApplyScholarship() {
         graduation_year: parseInt(graduationYear),
         field_of_study: fieldOfStudy,
         additional_documents: additionalDocuments.split('\n').filter(doc => doc.trim()),
-      });
+        uploaded_documents: uploadedFiles,
+      })
+      .select()
+      .single();
 
     if (error) {
       toast({
@@ -119,6 +124,7 @@ export default function ApplyScholarship() {
       setGraduationYear('');
       setFieldOfStudy('');
       setAdditionalDocuments('');
+      setUploadedFiles([]);
       setSelectedScholarship(null);
       
       navigate('/dashboard');
@@ -290,15 +296,22 @@ export default function ApplyScholarship() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="additionalDocuments">Additional Documents</Label>
+                        <Label htmlFor="additionalDocuments">Additional Notes</Label>
                         <Textarea
                           id="additionalDocuments"
                           value={additionalDocuments}
                           onChange={(e) => setAdditionalDocuments(e.target.value)}
-                          placeholder="List any additional documents or achievements (one per line)..."
+                          placeholder="Any additional notes or achievements..."
                           rows={3}
                         />
                       </div>
+
+                      <DocumentUpload
+                        applicationId={selectedScholarship.id}
+                        userId={user.id}
+                        onFilesUploaded={setUploadedFiles}
+                        existingFiles={uploadedFiles}
+                      />
 
                       <Button type="submit" className="w-full" disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

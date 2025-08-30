@@ -18,7 +18,9 @@ import {
   Eye,
   DollarSign,
   GraduationCap,
-  FileText
+  FileText,
+  Download,
+  ExternalLink
 } from 'lucide-react';
 
 export default function InstitutionDashboard() {
@@ -139,6 +141,44 @@ export default function InstitutionDashboard() {
     }
 
     setIsLoading(false);
+  };
+
+  const downloadDocument = async (filePath: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('student-documents')
+        .download(filePath);
+
+      if (error) {
+        toast({
+          title: "Download failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create download link
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filePath.split('/').pop() || 'document';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getFileName = (filePath: string) => {
+    return filePath.split('/').pop() || filePath;
   };
 
   if (loading) {
@@ -318,6 +358,32 @@ export default function InstitutionDashboard() {
                                 {application.personal_statement}
                               </p>
                             </div>
+
+                            {application.uploaded_documents && application.uploaded_documents.length > 0 && (
+                              <div className="mb-4">
+                                <p className="text-sm font-medium mb-2">Uploaded Documents:</p>
+                                <div className="space-y-2">
+                                  {application.uploaded_documents.map((filePath: string, idx: number) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 border rounded bg-secondary/10">
+                                      <div className="flex items-center gap-2">
+                                        <FileText className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm truncate max-w-[200px]">
+                                          {getFileName(filePath)}
+                                        </span>
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => downloadDocument(filePath)}
+                                        className="h-8 px-2"
+                                      >
+                                        <Download className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                             {application.status === 'pending' && (
                               <div className="flex gap-2">

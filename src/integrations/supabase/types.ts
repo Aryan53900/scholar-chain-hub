@@ -178,6 +178,7 @@ export type Database = {
           submitted_at: string | null
           transaction_hash: string | null
           updated_at: string | null
+          uploaded_documents: string[] | null
         }
         Insert: {
           academic_records?: Json | null
@@ -197,6 +198,7 @@ export type Database = {
           submitted_at?: string | null
           transaction_hash?: string | null
           updated_at?: string | null
+          uploaded_documents?: string[] | null
         }
         Update: {
           academic_records?: Json | null
@@ -216,6 +218,7 @@ export type Database = {
           submitted_at?: string | null
           transaction_hash?: string | null
           updated_at?: string | null
+          uploaded_documents?: string[] | null
         }
         Relationships: [
           {
